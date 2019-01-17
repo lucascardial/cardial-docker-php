@@ -9,9 +9,7 @@ RUN apt-get install -y software-properties-common
 RUN apt-get install -y python-software-properties
 RUN LC_ALL=C.UTF-8 add-apt-repository ppa:ondrej/php
 RUN apt-get update
-
-RUN apt-get update
-RUN command apt-get install -y nginx php7.2-fpm php7.2-dev curl git php-pear && apt-get clean
+RUN command apt-get install -y nginx php7.2 php7.2-fpm php7.2-dev curl git php-pear && apt-get clean
 
 # NGINX
 RUN ln -sf /dev/stdout /var/log/nginx/access.log
@@ -27,14 +25,15 @@ ENV COMPOSER_ALLOW_SUPERUSER 1
 # BUILD
 WORKDIR /var/www/html
 RUN pecl install mongodb
-#RUN git clone https://<seu usuario>:<sua senha>@bitbucket.org/<usuario dono do repositório>/<nome do repositório> <nome da aplicação>
 
-RUN mkdir /var/www/html/storage
-RUN mkdir /var/www/html/bootstrap
-RUN mkdir /var/www/html/bootstrap/cache
+# RUN curl https://raw.githubusercontent.com/docker-library/php/master/docker-php-ext-enable --output docker-php-ext-enable
+# RUN mv docker-php-ext-enable /bin/docker-php-ext-enable
+# RUN chmod 744 /bin/docker-php-ext-enable
 
-RUN chown -R $USER:www-data /var/www/html/storage
-RUN chown -R $USER:www-data /var/www/html/bootstrap/cache
-RUN chmod -R 777 /var/www/html/storage
+# RUN chown -R $USER:www-data /var/www/html/storage
+# RUN chown -R $USER:www-data /var/www/html/bootstrap/cache
+# RUN chmod -R 777 /var/www/html/storage
 EXPOSE 80 443
-CMD service php7.2-fpm start && nginx -g "daemon off;"
+RUN echo "extension=mongodb.so" > /etc/php/7.2/fpm/conf.d/30-mongodb.ini
+RUN echo "extension=mongodb.so" > /etc/php/7.2/cli/conf.d/30-mongodb.ini
+CMD chmod -R 777 /var/www/html/storage && service php7.2-fpm start && nginx -g "daemon off;" 
